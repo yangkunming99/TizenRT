@@ -30,9 +30,6 @@
 #ifndef _MPU_H_
 #define _MPU_H_
 
-#include "basic_types.h"
-#include "sys/types.h"
-
 /**
   \brief  The data structure for a MPU region configuration
 */
