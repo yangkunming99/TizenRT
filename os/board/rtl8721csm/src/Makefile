@@ -90,6 +90,7 @@ include component/soc/realtek/amebad/fwlib/usb_otg/device/class/msc/src/Make.def
 endif
 include component/common/api/at_cmd/Make.defs
 include project/realtek_amebaD_va0_example/src/Make.defs
+include component/common/utilities/Make.defs
 
 ARCH_SRCDIR = 	$(TOPDIR)/arch/$(CONFIG_ARCH)/src/
 BOARD_SRCDIR = 	$(TOPDIR)/board

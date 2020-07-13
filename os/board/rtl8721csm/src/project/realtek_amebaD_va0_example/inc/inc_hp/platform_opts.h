@@ -73,7 +73,7 @@
 #define CONFIG_SSL_CLIENT	0
 #define CONFIG_WEBSERVER	0
 #define CONFIG_OTA_UPDATE	0
-#define CONFIG_BSD_TCP		0//NOTE : Enable CONFIG_BSD_TCP will increase about 11KB code size
+#define CONFIG_BSD_TCP		1//NOTE : Enable CONFIG_BSD_TCP will increase about 11KB code size
 #define CONFIG_AIRKISS		0//on or off tencent airkiss
 #define CONFIG_UART_SOCKET	0
 #define CONFIG_JOYLINK			0//on or off for jdsmart or joylink
