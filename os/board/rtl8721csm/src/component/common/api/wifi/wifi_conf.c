@@ -163,10 +163,11 @@ struct task_struct wifi_autoreconnect_task;
 /******************************************************
  *               Function Definitions
  ******************************************************/
+#if defined(CONFIG_PLATFORM_TIZENRT_OS)
 #include "rtk_wifi_utils.h"
 static rtk_network_link_callback_t g_link_up = NULL;
 static rtk_network_link_callback_t g_link_down = NULL;
-
+#endif
 #if CONFIG_WLAN
 
 extern unsigned char is_promisc_enabled(void);
@@ -358,7 +359,6 @@ static void wifi_disconn_hdl( char* buf, int buf_len, int flags, void* userdata)
 	( void ) userdata;
 #define REASON_4WAY_HNDSHK_TIMEOUT 15
 	u16 disconn_reason;
-	rtk_reason_t reason;
 	/* buf detail: mac addr + disconn_reason, buf_len = ETH_ALEN+2*/
 	if (buf != NULL){
 		/* buf detail: mac addr + disconn_reason, buf_len = ETH_ALEN+2*/
@@ -412,12 +412,15 @@ static void wifi_disconn_hdl( char* buf, int buf_len, int flags, void* userdata)
 	if(join_user_data != NULL) {
 		rtw_up_sema(&join_user_data->join_sema);
 	} else {
+#if defined(CONFIG_PLATFORM_TIZENRT_OS)
+		rtk_reason_t reason;
 		memset(&reason, 0, sizeof(rtk_reason_t));
 
 		if (g_link_down) {
 			ndbg("RTK_API rtk_link_event_handler send link_down\n");
 			g_link_down(&reason);
 		}
+#endif
 	}
 	//RTW_API_INFO("\r\nWiFi Disconnect. Error flag is %d.\n", error_flag);
 
@@ -526,6 +529,7 @@ void restore_wifi_info_to_flash(void)
 #endif
 
 //----------------------------------------------------------------------------//
+#if defined(CONFIG_PLATFORM_TIZENRT_OS)
 int8_t WiFiRegisterLinkCallback(rtk_network_link_callback_t link_up, rtk_network_link_callback_t link_down)
 {
 	if (!g_link_up) {
@@ -537,7 +541,7 @@ int8_t WiFiRegisterLinkCallback(rtk_network_link_callback_t link_up, rtk_network
 
 	return RTK_STATUS_SUCCESS;
 }
-
+#endif
 int wifi_connect(
 	char 				*ssid,
 	rtw_security_t	security_type,
@@ -551,8 +555,9 @@ int wifi_connect(
 	rtw_result_t result = RTW_SUCCESS;
 	u8 wep_hex = 0;
 	u8 wep_pwd[14] = {0};
+#if defined(CONFIG_PLATFORM_TIZENRT_OS)			
 	rtk_reason_t reason;
-
+#endif
 	if(rtw_join_status & JOIN_CONNECTING){
 		if(wifi_disconnect() < 0){
 			RTW_API_INFO("\nwifi_disconnect Operation failed!");
@@ -702,6 +707,7 @@ int wifi_connect(
 				rtw_free(join_result->network_info.password);
 			}
 			result = RTW_TIMEOUT;
+#if defined(CONFIG_PLATFORM_TIZENRT_OS)			
 				memset(&reason, 0, sizeof(rtk_reason_t));
 				switch (error_flag) {
 				case RTW_NONE_NETWORK:
@@ -724,6 +730,7 @@ int wifi_connect(
 					ndbg("RTK_API %s() send link_up\n", __func__);
 					g_link_up(&reason);
 				}
+#endif
 			goto error;
 		} else {
 			if(join_result->network_info.password_len) {
@@ -731,6 +738,7 @@ int wifi_connect(
 			}
 			if(wifi_is_connected_to_ap( ) != RTW_SUCCESS) {
 				result = RTW_ERROR;
+#if defined(CONFIG_PLATFORM_TIZENRT_OS)
 				memset(&reason, 0, sizeof(rtk_reason_t));
 				reason.reason_code = RTK_STATUS_ERROR;
 				if (g_link_up) {
@@ -739,8 +747,10 @@ int wifi_connect(
 					ndbg("RTK_API %s() send link_up\n", __func__);
 					g_link_up(&reason);
 				}
+#endif
 				goto error;
 			}
+#if defined(CONFIG_PLATFORM_TIZENRT_OS)
 				memset(&reason, 0, sizeof(rtk_reason_t));
 				rtw_memcpy(reason.bssid, join_result->network_info.bssid.octet, ETH_ALEN);
 				rtw_memcpy(reason.ssid, join_result->network_info.ssid.val, 32);
@@ -754,6 +764,7 @@ int wifi_connect(
 					ndbg("RTK_API %s() send link_up\n", __func__);
 					g_link_up(&reason);
 				}
+#endif
 		}
 	}
 
@@ -1428,9 +1439,10 @@ int wifi_off(void)
 	}
 
 	wifi_mode = RTW_MODE_NONE;
-
+#if defined(CONFIG_PLATFORM_TIZENRT_OS)
 	g_link_up = NULL;
 	g_link_down = NULL;
+#endif
 
 #if CONFIG_INIC_EN
 	inic_stop();
@@ -1614,6 +1626,7 @@ static void wifi_ap_sta_assoc_hdl( char* buf, int buf_len, int flags, void* user
 	( void ) flags;
 	( void ) userdata;
 	//USER TODO
+#if defined(CONFIG_PLATFORM_TIZENRT_OS)
 	rtk_reason_t reason;
 	memset(&reason, 0, sizeof(rtk_reason_t));
 	if (strlen(buf) >= 17) {			  // bssid is a 17 character string
@@ -1624,6 +1637,7 @@ static void wifi_ap_sta_assoc_hdl( char* buf, int buf_len, int flags, void* user
 		ndbg("RTK_API rtk_link_event_handler send link_up\n");
 		g_link_up(&reason);
 	}
+#endif
 }
 static void wifi_ap_sta_disassoc_hdl( char* buf, int buf_len, int flags, void* userdata)
 {
@@ -1633,6 +1647,7 @@ static void wifi_ap_sta_disassoc_hdl( char* buf, int buf_len, int flags, void* u
 	( void ) flags;
 	( void ) userdata;
 	//USER TODO
+#if defined(CONFIG_PLATFORM_TIZENRT_OS)
 	rtk_reason_t reason;
 	memset(&reason, 0, sizeof(rtk_reason_t));
 	if (strlen(buf) >= 17) { // bssid is a 17 character string
@@ -1642,6 +1657,7 @@ static void wifi_ap_sta_disassoc_hdl( char* buf, int buf_len, int flags, void* u
 		ndbg("RTK_API rtk_handle_disconnect send link_down\n");
 		g_link_down(&reason);
 	}
+#endif
 }
 
 int wifi_get_last_error(void)
