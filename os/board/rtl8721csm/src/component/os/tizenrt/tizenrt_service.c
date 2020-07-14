@@ -16,6 +16,8 @@
 #include <osdep_service.h>
 #include <stdio.h>
 #include "rtl8721d_cache.h"
+#include <tinyara/sched.h>
+#include "../../../kernel/sched/sched.h"
 /********************* os depended utilities ********************/
 
 #ifndef USE_MUTEX_FOR_SPINLOCK
@@ -1006,12 +1008,21 @@ void shell_switch_ipc_int(VOID *Data, u32 IrqStatus, u32 ChanNum)
 
 uint32_t *vTaskStackAddr(void)
 {
-	return NULL;
+	struct tcb_s *rtcb = this_task();
+	/* Get the limits on the user stack memory */
+	return (uint32_t *)rtcb->adj_stack_ptr;
 }
 
 uint32_t vTaskStackSize(void)
 {
-	return 0;
+	struct tcb_s *rtcb = this_task();
+	return (uint32_t)rtcb->adj_stack_size;
+}
+
+char * vTaskName(void)
+{
+	struct tcb_s *rtcb = this_task();
+	return (char *)rtcb->name;
 }
 
 void vPortEnterCritical(void)

@@ -129,6 +129,8 @@
 
 #define CONFIG_JOINLINK    0
 
+#define CONFIG_EXAMPLE_CM_BACKTRACE 1
+
 #endif //end of #if CONFIG_WLAN
 /*******************************************************************************/
 
