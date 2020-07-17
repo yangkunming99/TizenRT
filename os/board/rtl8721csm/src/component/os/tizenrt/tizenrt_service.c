@@ -479,7 +479,7 @@ static void _tizenrt_msleep_os(int ms)
 
 static void _tizenrt_usleep_os(int us)
 {
-	usleep((unsigned int)us);
+	up_udelay((unsigned int)us);
 }
 
 static void _tizenrt_mdelay_os(int ms)
