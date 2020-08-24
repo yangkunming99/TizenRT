@@ -183,7 +183,7 @@ void INT_HardFault_Patch_C(uint32_t mstack[], uint32_t pstack[], uint32_t lr_val
 		}
 	}
 
-#if defined(CONFIG_EXAMPLE_CM_BACKTRACE) && CONFIG_EXAMPLE_CM_BACKTRACE
+#if 0//defined(CONFIG_EXAMPLE_CM_BACKTRACE) && CONFIG_EXAMPLE_CM_BACKTRACE
 	cm_backtrace_fault(IsPstack ? pstack : mstack, lr_value);
 	while(1);
 #else
@@ -450,9 +450,11 @@ void app_start(void)
 	DBG_PRINTF(MODULE_BOOT, LEVEL_INFO,"KM4 BOOT REASON: %x \n", BOOT_Reason());
 
 	SystemCoreClockUpdate();
-
-	SOCPS_InitSYSIRQ_HP();
 	
+	/* all IRQ setup must be after os_start */
+#ifndef CONFIG_PLATFORM_TIZENRT_OS
+	SOCPS_InitSYSIRQ_HP();
+#endif
 	/* Init PSRAM */
 	if(TRUE == psram_dev_config.psram_dev_enable) {
 		app_init_psram();
@@ -490,7 +492,10 @@ extern void __libc_init_array(void);
 	mpu_init();
 	app_mpu_nocache_init();
 	app_vdd1833_detect();
+	/* all IRQ setup must be after os_start */
+#ifndef CONFIG_PLATFORM_TIZENRT_OS
 	memcpy_gdma_init();
+#endif
 	//retention Ram space should not exceed 0xB0
 	assert_param(sizeof(RRAM_TypeDef) <= 0xB0);
 
@@ -501,7 +506,6 @@ extern void __libc_init_array(void);
 	go_os_start((FAR void *)&_ebss, CONFIG_IDLETHREAD_STACKSIZE);
 #else
 	/* Call os_start() */
-
 	os_start();
 
 	/* Shoulnd't get here */
