@@ -161,6 +161,10 @@ int memcpy_gdma(void *dest, void *src, u32 size)
 
 	gdma_memcpy.GDMA_InitStruct.GDMA_SrcAddr = (u32)(src);
 	gdma_memcpy.GDMA_InitStruct.GDMA_DstAddr = (u32)(dest);
+#ifdef CONFIG_PLATFORM_TIZENRT_OS
+	DCache_CleanInvalidate(src, size);
+	DCache_CleanInvalidate(dest, size);
+#endif
 	GDMA_Init(0, gdma_memcpy.ch_num, &(gdma_memcpy.GDMA_InitStruct));
 	GDMA_Cmd(0, gdma_memcpy.ch_num, ENABLE);
 
@@ -170,7 +174,10 @@ int memcpy_gdma(void *dest, void *src, u32 size)
 		__NOP();
 		__NOP();
 	}
-
+#ifdef CONFIG_PLATFORM_TIZENRT_OS
+	DCache_CleanInvalidate(src, size);
+	DCache_CleanInvalidate(dest, size);
+#endif
 	return 0;
 }
 
