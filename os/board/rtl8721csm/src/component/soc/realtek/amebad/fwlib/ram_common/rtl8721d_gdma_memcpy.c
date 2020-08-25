@@ -106,13 +106,23 @@ void memcpy_gdma_init(void)
 }
 
 IMAGE2_RAM_TEXT_SECTION
-static inline u32 memcpy_use_cpu(void *dest, void *src, u32 size) 
+static int __in_interrupt(void)
+{
+#if defined(__ICCARM__)
+	return (__get_PSR()&0x1FF)!=0;
+#elif defined(__GNUC__)
+	return (__get_xPSR()&0x1FF)!=0;
+#endif
+}
+
+IMAGE2_RAM_TEXT_SECTION
+static inline u32 memcpy_use_cpu(void *dest, void *src, u32 size)
 {
 	/* To avoid gcc warnings */
 	( void ) dest;
 	( void ) src;
 #ifdef CONFIG_PLATFORM_TIZENRT_OS
-	if (gdma_memcpy_inited == 0) {
+	if (gdma_memcpy_inited == 0 || __get_PRIMASK() == 1 || __in_interrupt()) {
 		return TRUE;
 	}
 #endif
@@ -128,18 +138,16 @@ static inline u32 memcpy_use_cpu(void *dest, void *src, u32 size)
 }
 
 IMAGE2_RAM_TEXT_SECTION
-int memcpy_gdma(void *dest, void *src, u32 size) 
+int memcpy_gdma(void *dest, void *src, u32 size)
 {
 	u32 size_4byte = size & ~(0x03);
 	u32 left = size & (0x03);
-
 	if (memcpy_use_cpu(dest, src, size) == TRUE) {
 		_memcpy(dest, src, size);
 
 		return 0;
 	}
 	gdma_memcpy.dma_done = 0;
-
 	if (((u32)(src)& 0x03) || ((u32)(dest)& 0x03)) {
 		gdma_memcpy.GDMA_InitStruct.GDMA_SrcDataWidth = TrWidthOneByte;
 		gdma_memcpy.GDMA_InitStruct.GDMA_DstDataWidth = TrWidthOneByte;
@@ -167,12 +175,10 @@ int memcpy_gdma(void *dest, void *src, u32 size)
 #endif
 	GDMA_Init(0, gdma_memcpy.ch_num, &(gdma_memcpy.GDMA_InitStruct));
 	GDMA_Cmd(0, gdma_memcpy.ch_num, ENABLE);
-
 	//xSemaphoreTake(dma_memcpy_sema, portMAX_DELAY);
 	while (gdma_memcpy.dma_done == 0) {
-		__NOP();
-		__NOP();
-		__NOP();
+		//rtw_msleep_os(1);
+		usleep(1);
 	}
 #ifdef CONFIG_PLATFORM_TIZENRT_OS
 	DCache_CleanInvalidate(src, size);
