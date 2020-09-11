@@ -184,7 +184,7 @@ void mpu_set_mem_attr(uint8_t attr_idx, uint8_t mem_attr);
 void mpu_region_cfg(uint8_t region_num, mpu_region_config *pmpu_cfg);
 void mpu_enable(void);
 void mpu_disable(void);
-void mpu_entry_free(u32 entry_index);
+void mpu_entry_free(uint32_t entry_index);
 char mpu_entry_alloc(void);
 
 #endif //_MPU_H_

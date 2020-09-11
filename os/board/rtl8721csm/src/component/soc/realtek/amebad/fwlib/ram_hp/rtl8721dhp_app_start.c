@@ -1032,7 +1032,7 @@ void INT_HardFault_Patch_C(uint32_t mstack[], uint32_t pstack[], uint32_t lr_val
 		}
 	}
 
-#if defined(CONFIG_EXAMPLE_CM_BACKTRACE) && CONFIG_EXAMPLE_CM_BACKTRACE
+#if 0//defined(CONFIG_EXAMPLE_CM_BACKTRACE) && CONFIG_EXAMPLE_CM_BACKTRACE
 	cm_backtrace_fault(IsPstack ? pstack : mstack, lr_value);
 	while(1);
 #else
