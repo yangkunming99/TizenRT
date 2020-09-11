@@ -17,6 +17,7 @@
 ***************************************************************************************************/
 
 #include <tinyara/config.h>
+#include <semaphore.h>
 #include <tinyara/seclink_drv.h>
 #include <tinyara/security_hal.h>
 
