@@ -981,6 +981,16 @@ u32 app_mpu_nocache_init(void)
 	mpu_cfg.attr_idx = MPU_MEM_ATTR_IDX_NC;
 	mpu_region_cfg(mpu_entry, &mpu_cfg);
 
+	/* set PSRAM Memory Write-Back */
+    mpu_entry = mpu_entry_alloc();
+    mpu_cfg.region_base = 0x02000000;
+    mpu_cfg.region_size = 0x400000;
+    mpu_cfg.xn = MPU_EXEC_ALLOW;
+    mpu_cfg.ap = MPU_UN_PRIV_RW;
+    mpu_cfg.sh = MPU_NON_SHAREABLE;
+    mpu_cfg.attr_idx = MPU_MEM_ATTR_IDX_WB_T_RWA;
+    mpu_region_cfg(mpu_entry, &mpu_cfg);
+
 	return 0;
 }
 
@@ -1095,6 +1105,21 @@ INT_MemFault_Patch(void)
 	);
 }
 
+void INT_SecureFault_Patch(void)
+{
+    __ASM volatile(
+        "PUSH {R4-R11}\n\t"
+        "MRS R0, MSP\n\t"
+        "MRS R1, PSP\n\t"
+        "MOV R2, LR\n\t" /* second parameter is LR current value */
+        "MOV R3, #4\n\t"        
+        "SUB.W	R4, R0, #128\n\t"
+        "MSR MSP, R4\n\t"
+        "LDR R4,=INT_HardFault_Patch_C\n\t"
+        "BX R4\n\t"
+    );
+}
+
 #ifdef CONFIG_PLATFORM_TIZENRT_OS
 void exception_common(void);
 #ifdef CONFIG_AMEBAD_TRUSTZONE
@@ -1103,24 +1128,20 @@ void exception_common_svc(void);
 #endif
 VOID VectorTableOverride(VOID)
 {
+#ifdef CONFIG_PLATFORM_TIZENRT_OS
+	int i;
+	for(i=3;i<MAX_VECTOR_TABLE_NUM;i++)
+		NewVectorTable[i] = exception_common;
+#ifdef CONFIG_AMEBAD_TRUSTZONE
+	NewVectorTable[AMEBAD_IRQ_SVCALL] = (HAL_VECTOR_FUN)exception_common_svc;
+#endif
+#endif
 #if 1
 	NewVectorTable[3] = (HAL_VECTOR_FUN)INT_HardFault_Patch;
 	NewVectorTable[4] = (HAL_VECTOR_FUN)INT_MemFault_Patch;
 	NewVectorTable[5] = (HAL_VECTOR_FUN)INT_BusFault_Patch;
 	NewVectorTable[6] = (HAL_VECTOR_FUN)INT_UsageFault_Patch;
-#endif
-#ifdef CONFIG_PLATFORM_TIZENRT_OS
-	int i;
-	for(i=3;i<MAX_VECTOR_TABLE_NUM;i++)
-		NewVectorTable[i] = exception_common;
-	//NewVectorTable[AMEBAD_IRQ_HARDFAULT] = (HAL_VECTOR_FUN)HardFault_Handler_ram;
-	//NewVectorTable[AMEBAD_IRQ_MEMFAULT] = (HAL_VECTOR_FUN)MemManage_Handler_ram;
-	//NewVectorTable[AMEBAD_IRQ_BUSFAULT] = (HAL_VECTOR_FUN)BusFault_Handler_ram;
-	//NewVectorTable[AMEBAD_IRQ_USAGEFAULT] = (HAL_VECTOR_FUN)UsageFault_Handler_ram;
-	NewVectorTable[7] = (HAL_VECTOR_FUN)SecureFault_Handler_ram;
-#ifdef CONFIG_AMEBAD_TRUSTZONE
-	NewVectorTable[AMEBAD_IRQ_SVCALL] = (HAL_VECTOR_FUN)exception_common_svc;
-#endif
+	NewVectorTable[7] = (HAL_VECTOR_FUN)INT_SecureFault_Patch;
 #endif
 }
 
@@ -1235,7 +1256,7 @@ static void app_psram_load_ns(void)
 
 	/* load psram code+data into PSRAM */
 	if((PsramHdr->image_size != 0) && \
-		(PsramHdr->image_addr == 0x02000000) && \
+		(PsramHdr->image_addr == 0x02000020) && \
 		(PsramHdr->signature[0] == 0x35393138) && \
 		(PsramHdr->signature[1] == 0x31313738)) {
 
@@ -1279,8 +1300,10 @@ void app_start(void)
 
 	SystemCoreClockUpdate();
 
+	/* all IRQ setup must be after os_start */
+#ifndef CONFIG_PLATFORM_TIZENRT_OS
 	SOCPS_InitSYSIRQ_HP();
-	
+#endif
 	/* Init PSRAM */
 	if(TRUE == psram_dev_config.psram_dev_enable) {
 		app_init_psram();
@@ -1320,7 +1343,10 @@ extern void __libc_init_array(void);
 	app_mpu_nocache_init();
 #endif
 	app_vdd1833_detect();
+	/* all IRQ setup must be after os_start */
+#ifndef CONFIG_PLATFORM_TIZENRT_OS
 	memcpy_gdma_init();
+#endif
 	//retention Ram space should not exceed 0xB0
 	assert_param(sizeof(RRAM_TypeDef) <= 0xB0);
 

@@ -1,0 +1,7 @@
+---- ->nic Matches (6 in 3 files) ----
+Netdev_lwip.c (os\net\netmgr):#define GET_NETIF_FROM_NETDEV(dev) (struct netif *)(((struct netdev_ops *)(dev)->ops)->nic)
+Netdev_lwip.c (os\net\netmgr):	((struct netdev_ops *)dev->ops)->nic = (void *)nic;
+Netdev_lwip.c (os\net\netmgr):	//((struct netdev_ops *)(dev->ops))->nic = NULL;
+Netdev_lwip.c (os\net\netmgr):	netdev_ops->nic = NULL;
+Netdev_mgr.c (os\net\netmgr):	struct netif *ni = (struct netif *)ops->nic;
+Netmgr_ioctl_lwip.c (os\net\netmgr):#define GET_NETIF_FROM_NETDEV(dev) (struct netif *)(((struct netdev_ops *)(dev)->ops)->nic)
