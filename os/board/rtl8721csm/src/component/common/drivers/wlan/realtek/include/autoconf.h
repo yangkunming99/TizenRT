@@ -113,7 +113,11 @@
 //#define CONFIG_HIGH_TP
 //#define CONFIG_MEMORY_ACCESS_ALIGNED
 
+#ifdef CONFIG_PLATFORM_TIZENRT_OS
+#undef CONFIG_POWER_SAVING
+#else
 #define CONFIG_POWER_SAVING
+#endif
 #ifdef CONFIG_POWER_SAVING
 	#define CONFIG_IPS
 	#define CONFIG_LPS
@@ -255,7 +259,11 @@
 #endif
 
 // for probe request with custom vendor specific IE
+#ifdef CONFIG_PLATFORM_TIZENRT_OS
+#undef CONFIG_CUSTOM_IE
+#else
 #define CONFIG_CUSTOM_IE
+#endif
 
 #if (CONFIG_PLATFORM_AMEBA_X == 0)
 /* For multicast */
@@ -263,7 +271,11 @@
 #endif
 
 /* For STA+AP Concurrent MODE */
+#ifdef CONFIG_PLATFORM_TIZENRT_OS
+#undef CONFIG_CONCURRENT_MODE
+#else
 #define CONFIG_CONCURRENT_MODE
+#endif
 #ifdef CONFIG_CONCURRENT_MODE
 //#define CONFIG_MCC_MODE
   #if defined(CONFIG_PLATFORM_8195A) || defined(CONFIG_PLATFORM_8195BHP) || defined(CONFIG_PLATFORM_8710C)
@@ -318,7 +330,11 @@
 /****************** End of EAP configurations *******************/
 
 /* For WPS and P2P */
+#ifdef CONFIG_PLATFORM_TIZENRT_OS
+#undef CONFIG_WPS
+#else
 #define CONFIG_WPS
+#endif
 #if 0
 #define CONFIG_WPS_AP
 #define CONFIG_P2P_NEW
@@ -419,7 +435,11 @@ extern unsigned int g_ap_sta_num;
 		//#define CONFIG_BT_COEXIST
 		//#define CONFIG_SW_MAILBOX_EN
 		//#define NEW_BT_COEX
+		#ifdef CONFIG_PLATFORM_TIZENRT_OS
+		#undef CONFIG_BT_COEXIST_SOC
+		#else
 		#define CONFIG_BT_COEXIST_SOC
+		#endif
 	#endif
 	#if defined(CONFIG_PLATFORM_8710C)
 		//#define CONFIG_ANTENNA_DIVERSITY
@@ -504,12 +524,17 @@ extern unsigned int g_ap_sta_num;
 		#undef RX_AGGREGATION
 		#define RX_AGGREGATION 1
 		#undef NOT_SUPPORT_40M
+		#define RX_SHORTCUT 1
 		#endif
 		#undef NOT_SUPPORT_5G
 		#undef CONFIG_ADAPTOR_INFO_CACHING_FLASH
 		#define CONFIG_ADAPTOR_INFO_CACHING_FLASH 0
 		#define CONFIG_EFUSE_SEPARATE
+		#ifdef CONFIG_PLATFORM_TIZENRT_OS
+		#undef CONFIG_WOWLAN
+		#else
 		#define CONFIG_WOWLAN
+		#endif
 		//#define CONFIG_TRAFFIC_PROTECT
 		#undef SUPPORT_5G_CHANNEL
 		#define SUPPORT_5G_CHANNEL	1
@@ -761,7 +786,7 @@ extern unsigned int g_ap_sta_num;
 	#define SKB_PRE_ALLOCATE_RX	1
 #else
 #ifdef CONFIG_PLATFORM_TIZENRT_OS
-	#define SKB_PRE_ALLOCATE_RX	1
+	#define SKB_PRE_ALLOCATE_RX 1
 #else
 	#define SKB_PRE_ALLOCATE_RX	0
 #endif

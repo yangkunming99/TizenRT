@@ -83,7 +83,7 @@
 #endif
 
 #elif defined(CONFIG_LX_HCI) || defined(CONFIG_AXI_HCI)
-#define NR_XMITBUFF (8)
+#define NR_XMITBUFF (24)
 
 #elif defined(CONFIG_USB_HCI)
 #ifdef CONFIG_SINGLE_XMIT_BUF

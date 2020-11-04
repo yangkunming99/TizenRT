@@ -24,7 +24,7 @@
   #define WLAN0_NAME		"wlan0"
 #endif
 #ifdef CONFIG_PLATFORM_TIZENRT_OS
-#define configTICK_RATE_HZ 1
+#define configTICK_RATE_HZ 1000
 #endif
 struct iperf_data_t{
 	uint64_t total_size;

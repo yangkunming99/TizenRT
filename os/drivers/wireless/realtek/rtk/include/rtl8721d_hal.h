@@ -261,10 +261,10 @@ typedef enum tag_ChipID_Definition {
 #define TX_BKQ_DESC_NUM 4
 #define TX_BEQ_DESC_NUM 32
 #else
-#define TX_VIQ_DESC_NUM 4
-#define TX_VOQ_DESC_NUM 4
-#define TX_BKQ_DESC_NUM 4
-#define TX_BEQ_DESC_NUM 4
+#define TX_VIQ_DESC_NUM 8
+#define TX_VOQ_DESC_NUM 8
+#define TX_BKQ_DESC_NUM 8
+#define TX_BEQ_DESC_NUM 8
 #endif
 #ifdef CONFIG_CONCURRENT_MODE
 #define TX_BCNQ_DESC_NUM 4
@@ -280,7 +280,7 @@ typedef enum tag_ChipID_Definition {
 #define TX_H5Q_DESC_NUM 2
 #define TX_H6Q_DESC_NUM 2
 #define TX_H7Q_DESC_NUM 2
-#define RX_Q_DESC_NUM 4 //16 Reduce rx desc number due to memory limitation
+#define RX_Q_DESC_NUM 32//16 Reduce rx desc number due to memory limitation
 
 #define SET_VIQ_DES_NUM (TX_VIQ_DESC_NUM << 16)
 #define SET_VOQ_DES_NUM (TX_VOQ_DESC_NUM)

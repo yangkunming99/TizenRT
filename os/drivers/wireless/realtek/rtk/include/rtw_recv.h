@@ -184,7 +184,7 @@ struct recv_buf_stat {
 
 #if defined(CONFIG_LX_HCI)
 #define LX_MAX_RX_QUEUE 1 // MSDU packet queue, Rx Command Queue
-#define LX_MAX_RX_COUNT 4 //RX_Q_DESC_NUM// 128
+#define LX_MAX_RX_COUNT 32 //RX_Q_DESC_NUM// 128
 
 struct rtw_rx_ring {
 #if ((RTL8195A_SUPPORT == 1) || (RTL8711B_SUPPORT == 1) || (RTL8721D_SUPPORT == 1))
@@ -201,7 +201,7 @@ struct rtw_rx_ring {
 
 #if defined(CONFIG_AXI_HCI)
 #define AXI_MAX_RX_QUEUE 1 // MSDU packet queue, Rx Command Queue
-#define AXI_MAX_RX_COUNT 4 //RX_Q_DESC_NUM// 128
+#define AXI_MAX_RX_COUNT 32 //RX_Q_DESC_NUM// 128
 
 struct rtw_rx_ring {
 	struct recv_buf_stat *desc;
