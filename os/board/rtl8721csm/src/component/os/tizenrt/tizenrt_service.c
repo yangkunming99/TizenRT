@@ -31,16 +31,30 @@
 //----- ------------------------------------------------------------------
 extern void timer_wrapper(_timerHandle timer_hdl);
 
-static irqstate_t tizen_flags;
+static irqstate_t initial_tizen_flags, up_tizen_flag;
+static int flagcnt = 0;
+
 void save_and_cli()
 {
-	tizen_flags = 0;
-	tizen_flags = irqsave();
+	if(flagcnt){
+		up_tizen_flag = irqsave();
+	}else{
+		initial_tizen_flags = irqsave();
+	}
+	flagcnt++;
+	//tizen_flags = 0;
+	//tizen_flags = irqsave();
 }
 
 void restore_flags()
 {
-	irqrestore(tizen_flags);
+	flagcnt--;
+	if(flagcnt){
+		irqrestore(up_tizen_flag);
+	}else{
+		irqrestore(initial_tizen_flags);
+	}
+	//irqrestore(tizen_flags);
 }
 
 void cli()
