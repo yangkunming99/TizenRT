@@ -61,7 +61,7 @@
 #include <net/if.h>
 #include <debug.h>
 #include "amebad_enet.h"
-
+#ifdef CONFIG_NET_NETMGR
 #include <tinyara/kmalloc.h>
 #include <tinyara/netmgr/netdev_mgr.h>
 #include "wifi_structures.h"
@@ -209,3 +209,9 @@ void up_netinitialize(void)
 	}
 #endif	
 }
+#else
+void up_netinitialize(void)
+{
+
+}
+#endif
