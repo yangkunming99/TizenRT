@@ -11,13 +11,15 @@
 #if defined CONFIG_BT && CONFIG_BT
 #include "platform_opts_bt.h"
 #endif
+#include <tinyara/config.h>
+
 /*For MP mode setting*/
 //#define SUPPORT_MP_MODE		1
 
 /**
  * For AT cmd Log service configurations
  */
-#define SUPPORT_LOG_SERVICE	0
+#define SUPPORT_LOG_SERVICE	1
 #if SUPPORT_LOG_SERVICE
 #define LOG_SERVICE_BUFLEN     100 //can't larger than UART_LOG_CMD_BUFLEN(127)
 #define CONFIG_LOG_HISTORY	0
@@ -65,6 +67,11 @@
  */
 #define CONFIG_WLAN	1
 #if CONFIG_WLAN
+#ifdef CONFIG_NET_NETMGR
+#define CONFIG_LWIP_LAYER	0
+#else
+#define CONFIG_LWIP_LAYER	1
+#endif
 #define CONFIG_INIT_NET		0 //init lwip layer when start up
 #define CONFIG_WIFI_IND_USE_THREAD	0	// wifi indicate worker thread
 
@@ -72,7 +79,7 @@
 #define CONFIG_SSL_CLIENT	0
 #define CONFIG_WEBSERVER	0
 #define CONFIG_OTA_UPDATE	0
-#define CONFIG_BSD_TCP		0//NOTE : Enable CONFIG_BSD_TCP will increase about 11KB code size
+#define CONFIG_BSD_TCP		1//NOTE : Enable CONFIG_BSD_TCP will increase about 11KB code size
 #define CONFIG_AIRKISS		0//on or off tencent airkiss
 #define CONFIG_UART_SOCKET	0
 #define CONFIG_JOYLINK			0//on or off for jdsmart or joylink

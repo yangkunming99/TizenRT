@@ -49,15 +49,9 @@
 #
 ############################################################################
 
-CSRCS += tizenrt_service.c \
-	 lwip_intf_tizenrt.c \
-	 ethernetif_tizenrt.c \
+CSRCS += log_service.c \
+	 atcmd_sys.c \
+	 atcmd_wifi.c
 
-ifeq ($(CONFIG_NET_NETMGR),y)
-CSRCS += rtk_netmgr.c
-else
-CSRCS += rtk_lwip_netconf.c
-CSRCS += rtk_utils.c
-endif
-DEPPATH += --dep-path component/os/tizenrt
-VPATH += :component/os/tizenrt
+DEPPATH += --dep-path component/common/api/at_cmd
+VPATH += :component/common/api/at_cmd

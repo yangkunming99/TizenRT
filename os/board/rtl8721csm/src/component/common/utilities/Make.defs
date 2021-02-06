@@ -49,15 +49,7 @@
 #
 ############################################################################
 
-CSRCS += tizenrt_service.c \
-	 lwip_intf_tizenrt.c \
-	 ethernetif_tizenrt.c \
+CSRCS += tcptest.c
 
-ifeq ($(CONFIG_NET_NETMGR),y)
-CSRCS += rtk_netmgr.c
-else
-CSRCS += rtk_lwip_netconf.c
-CSRCS += rtk_utils.c
-endif
-DEPPATH += --dep-path component/os/tizenrt
-VPATH += :component/os/tizenrt
+DEPPATH += --dep-path component/common/utilities
+VPATH += :component/common/utilities
