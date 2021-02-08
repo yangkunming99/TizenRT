@@ -70,6 +70,7 @@
 #ifdef CONFIG_NET_NETMGR
 #define CONFIG_LWIP_LAYER	0
 #else
+#define WIFI_LOGO_CERTIFICATION_CONFIG 1
 #define CONFIG_LWIP_LAYER	1
 #endif
 #define CONFIG_INIT_NET		0 //init lwip layer when start up

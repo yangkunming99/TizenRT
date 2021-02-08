@@ -2,6 +2,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
+#else
+#include "osdep_service.h"
 #endif
 #include "log_service.h"
 #include "atcmd_wifi.h"
@@ -172,9 +174,9 @@ void send_arp_thread(void *param)
 	while(arp_keep_alive){
 		gw = LwIP_GetGW(&xnetif[0]);
 		etharp_request(pnetif, (const ip4_addr_t*) gw);
-		vTaskDelay(1000);
+		rtw_msleep_os(1000);
 	}
-	vTaskDelete(NULL);
+	rtw_thread_exit();
 }
 #endif
 
@@ -1195,9 +1197,10 @@ void fATWC(void *arg){
 	printf("\n\r");
 
 #if WIFI_LOGO_CERTIFICATION_CONFIG
+	struct task_struct send_arp_task;
 	//For KRACK 5.2.1, 5.2.2, 5.2.3 test, the SVD tool monitors traffic sent by the STA to see if the pairwise key is being reinstalled
 	//To assure that the STA is sending enough frames, create a thread to send arp request to gateway after wifi connection.
-	if(xTaskCreate(send_arp_thread, ((const char*)"send_arp_thread"), 512, NULL, tskIDLE_PRIORITY + 1, NULL) != 1)
+	if(rtw_create_task(&send_arp_task, ((const char*)"send_arp_thread"), 512, 1, send_arp_thread,  NULL) != 1)
 		printf("\n\r%s xTaskCreate(send_arp_thread) failed", __FUNCTION__);
 	else
 		arp_keep_alive=1;
