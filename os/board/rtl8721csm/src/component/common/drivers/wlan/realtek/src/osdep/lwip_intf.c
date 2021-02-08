@@ -302,4 +302,3 @@ unsigned char *rltk_wlan_get_gwmask(int idx){
 }
 #endif
 
-

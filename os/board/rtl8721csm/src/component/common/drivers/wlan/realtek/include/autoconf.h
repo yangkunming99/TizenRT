@@ -79,7 +79,7 @@
 #endif
 #define CONFIG_LITTLE_ENDIAN
 #define CONFIG_80211N_HT
-//#define CONFIG_RECV_REORDERING_CTRL
+#define CONFIG_RECV_REORDERING_CTRL
 #define RTW_NOTCH_FILTER 0
 #define CONFIG_EMBEDDED_FWIMG
 #define CONFIG_PHY_SETTING_WITH_ODM
@@ -137,7 +137,7 @@
 #define BAD_MIC_COUNTERMEASURE 1
 #define DEFRAGMENTATION 1
 
-#define WIFI_LOGO_CERTIFICATION 0
+#define WIFI_LOGO_CERTIFICATION 1
 #if WIFI_LOGO_CERTIFICATION
     #define RX_AGGREGATION 1
 	#define RX_AMSDU 1
@@ -145,7 +145,7 @@
 	#ifdef CONFIG_HIGH_TP_TEST
     		#define RX_AGGREGATION 1
 	#else
-		#define RX_AGGREGATION 0
+		#define RX_AGGREGATION 1
 	#endif
 	#define RX_AMSDU 0
 #endif
@@ -201,7 +201,7 @@
 #define NOT_SUPPORT_RF_MULTIPATH
 #endif
 #define NOT_SUPPORT_VHT
-#define NOT_SUPPORT_40M
+//#define NOT_SUPPORT_40M
 #define NOT_SUPPORT_80M
 #if defined(CONFIG_PLATFORM_8195A)
 #define NOT_SUPPORT_BBSWING
@@ -431,11 +431,7 @@ extern unsigned int g_ap_sta_num;
 		//#define CONFIG_BT_COEXIST
 		//#define CONFIG_SW_MAILBOX_EN
 		//#define NEW_BT_COEX
-		#ifdef CONFIG_PLATFORM_TIZENRT_OS
-		#undef CONFIG_BT_COEXIST_SOC
-		#else
 		#define CONFIG_BT_COEXIST_SOC
-		#endif
 	#endif
 	#if defined(CONFIG_PLATFORM_8710C)
 		//#define CONFIG_ANTENNA_DIVERSITY
@@ -558,6 +554,7 @@ extern unsigned int g_ap_sta_num;
 		#endif
 	#define CONFIG_WLAN_SWITCH_MODE         //save memory while switching mode without driver re-init
 	//#define LOW_POWER_WIFI_CONNECT
+	//#define LONG_PERIOD_TICKLESS
 	#endif
 	#if defined(CONFIG_PLATFORM_8195BHP)
 		#define CONFIG_RTL8195B

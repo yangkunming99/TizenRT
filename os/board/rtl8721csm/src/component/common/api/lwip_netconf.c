@@ -16,7 +16,9 @@
 #if CONFIG_WLAN
 #include "wifi_ind.h"
 #endif
-
+#if CONFIG_BRIDGE
+#include "netif/bridgeif.h"
+#endif
 #include <platform/platform_stdlib.h>
 
 #if defined(CONFIG_FAST_DHCP) && CONFIG_FAST_DHCP
@@ -102,6 +104,16 @@
 /* Private variables ---------------------------------------------------------*/
 
 struct netif xnetif[NET_IF_NUM]; /* network interface structure */
+
+#if CONFIG_BRIDGE
+bridgeif_initdata_t bridge_initdata;
+extern err_t bridgeif_recv_input(struct pbuf *p, struct netif *inputif);
+extern err_t bridgeif_tcpip_input(struct pbuf *p, struct netif *netif);
+extern err_t bridgeif_mac_init(struct netif *netif, char *bmac);
+extern err_t bridgeif_add_port(struct netif *bridgeif, struct netif *portif);
+extern u8_t bridgeif_get_portnum(struct netif *bridgeif);
+#endif
+
 /* Private functions ---------------------------------------------------------*/
 /**
   * @brief  Initializes the lwIP stack
@@ -115,6 +127,28 @@ extern rtw_mode_t wifi_mode;
 
 int lwip_init_done = 0;
 
+#if CONFIG_BRIDGE
+void bridgeif_set_mac_init(char *bmac)
+{
+	bridgeif_mac_init(&xnetif[NET_IF_NUM - 1], bmac);
+}
+
+void bridgeif_add_port_ap_netif(void)
+{
+	bridgeif_add_port(&xnetif[NET_IF_NUM - 1], &xnetif[1]);
+}
+
+void bridgeif_add_port_sta_netif(void)
+{
+	bridgeif_add_port(&xnetif[NET_IF_NUM - 1], &xnetif[0]);
+}
+
+u8_t get_bridge_portnum(void)
+{
+	return bridgeif_get_portnum(&xnetif[NET_IF_NUM - 1]);
+}
+#endif
+
 void LwIP_Init(void)
 {
 	struct ip_addr ipaddr;
@@ -124,6 +158,18 @@ void LwIP_Init(void)
 
 	/* Create tcp_ip stack thread */
 	tcpip_init( NULL, NULL );	
+
+#if CONFIG_BRIDGE
+	bridge_initdata.max_fdb_dynamic_entries=BRIDGEIF_MAX_DYNAMIC_ENTRY;
+	bridge_initdata.max_fdb_static_entries=BRIDGEIF_MAX_STATIC_ENTRY;
+	bridge_initdata.max_ports = BRIDGEIF_MAX_PORTS;
+	bridge_initdata.ethaddr.addr[0] = 0x00;
+	bridge_initdata.ethaddr.addr[1] = 0x01;
+	bridge_initdata.ethaddr.addr[2] = 0x02;
+	bridge_initdata.ethaddr.addr[3] = 0x03;
+	bridge_initdata.ethaddr.addr[4] = 0x04;
+	bridge_initdata.ethaddr.addr[5] = 0x05;
+#endif
 
 	/* - netif_add(struct netif *netif, struct ip_addr *ipaddr,
 	        struct ip_addr *netmask, struct ip_addr *gw,
@@ -138,6 +184,7 @@ void LwIP_Init(void)
 	The init function pointer must point to a initialization function for
 	your ethernet netif interface. The following code illustrates it's use.*/
 	//printf("NET_IF_NUM:%d\n\r",NET_IF_NUM);
+#if !CONFIG_BRIDGE
 	for(idx=0;idx<NET_IF_NUM;idx++){
 #if LWIP_VERSION_MAJOR >= 2
 		if(idx==0){
@@ -201,10 +248,30 @@ void LwIP_Init(void)
     printf("interface %d is initialized\n", idx);
 
 	}
+#else //!CONFIG_BRIDGE
+	for(idx = 0; idx < NET_IF_NUM; idx ++) {
+		xnetif[idx].name[0] = 'r';
+		xnetif[idx].name[1] = '0' + idx;
+		if(idx == NET_IF_NUM - 1) {
+			// only bridge interface has IP address
+			IP4_ADDR(ip_2_ip4(&ipaddr), IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
+			IP4_ADDR(ip_2_ip4(&netmask), NETMASK_ADDR0, NETMASK_ADDR1 , NETMASK_ADDR2, NETMASK_ADDR3);
+			IP4_ADDR(ip_2_ip4(&gw), GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+			netif_add(&xnetif[idx], ip_2_ip4(&ipaddr), ip_2_ip4(&netmask),ip_2_ip4(&gw), &bridge_initdata, &bridgeif_init, &tcpip_input);
+		}
+		else {
+			netif_add(&xnetif[idx], NULL, NULL, NULL, NULL, &ethernetif_init, &bridgeif_tcpip_input);
+		}
+	}
+#endif //!CONFIG_BRIDGE
 	
 	/*  Registers the default network interface. */
+#if CONFIG_BRIDGE
+	netif_set_default(&xnetif[NET_IF_NUM - 1]);
+	netif_set_up(&xnetif[NET_IF_NUM - 1]);
+#else
 	netif_set_default(&xnetif[0]);
-
+#endif
 	/*move these operations to wifi_on/wifi_off*/
 	#if 0
 	/*  When the netif is fully configured this function must be called.*/
@@ -245,7 +312,16 @@ uint8_t LwIP_DHCP(uint8_t idx, uint8_t dhcp_state)
 	if(idx > 1)
 		idx = 1;
 #endif
-
+#if CONFIG_BRIDGE
+	if(get_bridge_portnum() != (NET_IF_NUM - 1)) {
+		// return if bridge not ready
+		return 0;
+	}
+	else {
+		// only bridge interface has IP address
+		idx = NET_IF_NUM - 1;
+	}
+#endif
 	pnetif = &xnetif[idx];
 	if(DHCP_state == 0){
 		
@@ -285,8 +361,13 @@ uint8_t LwIP_DHCP(uint8_t idx, uint8_t dhcp_state)
 		{
 			case DHCP_START:
 			{
+#ifdef LOW_POWER_WIFI_CONNECT
+				rtw_wakelock_timeout(800);
+#else 
 				/*acqurie wakelock to guarantee dhcp*/
 				rtw_wakelock_timeout(4*1000);
+#endif
+
 #if CONFIG_WLAN
 				wifi_unreg_event_handler(WIFI_EVENT_BEACON_AFTER_DHCP, wifi_rx_beacon_hdl);
 #endif
@@ -445,6 +526,9 @@ uint8_t LwIP_DHCP(uint8_t idx, uint8_t dhcp_state)
 #endif
 					return DHCP_TIMEOUT;
 					}
+#ifdef LOW_POWER_WIFI_CONNECT
+				pmu_set_max_sleep_time(2000);//in case DHCP fail
+#endif
 				}
 			}
 		break;
@@ -518,6 +602,7 @@ uint8_t* LwIP_GetMASK(struct netif *pnetif)
 uint8_t* LwIP_GetBC(struct netif *pnetif)
 {
 #if LWIP_VERSION_MAJOR >= 2
+	(void) pnetif;
 	//struct dhcp *dhcp = ((struct dhcp*)netif_get_client_data(pnetif, LWIP_NETIF_CLIENT_DATA_INDEX_DHCP));
 	return NULL;
 #else
@@ -590,51 +675,6 @@ void LwIP_UseStaticIP(struct netif *pnetif)
 	netif_set_addr(pnetif, &ipaddr , &netmask, &gw);
 #endif
 }
-
-#ifdef CONFIG_RTK_MESH
-void LwIP_SetIP(struct netif *pnetif, u32 *addr3)
-{
-	struct ip_addr ipaddr;
-	struct ip_addr netmask;
-	struct ip_addr gw;
-
-	/* Static address used */
-	if(pnetif->name[1] == '0'){
-#if CONFIG_WLAN
-#ifdef CONFIG_RTK_MESH
-		if(wifi_mode == RTW_MODE_AP){
-#if LWIP_VERSION_MAJOR >= 2
-			IP4_ADDR(ip_2_ip4(&ipaddr), AP_IP_ADDR0, AP_IP_ADDR1, AP_IP_ADDR2, *addr3);
-			IP4_ADDR(ip_2_ip4(&netmask), AP_NETMASK_ADDR0, AP_NETMASK_ADDR1 , AP_NETMASK_ADDR2, AP_NETMASK_ADDR3);
-			IP4_ADDR(ip_2_ip4(&gw), AP_GW_ADDR0, AP_GW_ADDR1, AP_GW_ADDR2, AP_GW_ADDR3);
-#else
-			IP4_ADDR(&ipaddr, AP_IP_ADDR0, AP_IP_ADDR1, AP_IP_ADDR2, *addr3);
-			IP4_ADDR(&netmask, AP_NETMASK_ADDR0, AP_NETMASK_ADDR1 , AP_NETMASK_ADDR2, AP_NETMASK_ADDR3);
-			IP4_ADDR(&gw, AP_GW_ADDR0, AP_GW_ADDR1, AP_GW_ADDR2, AP_GW_ADDR3);
-#endif
-		}
-#endif
-#endif
-	}else{
-#if LWIP_VERSION_MAJOR >= 2
-		IP4_ADDR(ip_2_ip4(&ipaddr), AP_IP_ADDR0, AP_IP_ADDR1, AP_IP_ADDR2, *addr3);
-		IP4_ADDR(ip_2_ip4(&netmask), AP_NETMASK_ADDR0, AP_NETMASK_ADDR1 , AP_NETMASK_ADDR2, AP_NETMASK_ADDR3);
-		IP4_ADDR(ip_2_ip4(&gw), AP_GW_ADDR0, AP_GW_ADDR1, AP_GW_ADDR2, AP_GW_ADDR3);
-#else		
-		IP4_ADDR(&ipaddr, AP_IP_ADDR0, AP_IP_ADDR1, AP_IP_ADDR2, *addr3);
-		IP4_ADDR(&netmask, AP_NETMASK_ADDR0, AP_NETMASK_ADDR1 , AP_NETMASK_ADDR2, AP_NETMASK_ADDR3);
-		IP4_ADDR(&gw, AP_GW_ADDR0, AP_GW_ADDR1, AP_GW_ADDR2, AP_GW_ADDR3);
-#endif
-	}
-	
-#if LWIP_VERSION_MAJOR >= 2
-	netif_set_addr(pnetif, ip_2_ip4(&ipaddr), ip_2_ip4(&netmask),ip_2_ip4(&gw));
-#else
-	netif_set_addr(pnetif, &ipaddr , &netmask, &gw);
-#endif
-}
-#endif
-
 #if LWIP_AUTOIP
 #include <lwip/autoip.h>
 #if LWIP_VERSION_MAJOR >= 2
@@ -651,7 +691,7 @@ void LwIP_AUTOIP(struct netif *pnetif)
 #else
 	autoip = pnetif->autoip;
 #endif
-	if(autoip) // before autoip_start(), autoip may be NULL
+	if(autoip && (autoip->tried_llipaddr >= MAX_CONFLICTS)) // before autoip_start(), autoip may be NULL
 		autoip->tried_llipaddr = 0;
 
 	autoip_start(pnetif);

@@ -151,7 +151,7 @@ enum {
 
     RTW_SECURITY_FORCE_32_BIT   = 0x7fffffff                                        /**< Exists only to force rtw_security_t type to 32 bits */
 };
-typedef long rtw_security_t;
+typedef unsigned long rtw_security_t;
 
 enum {
     RTW_ENCRYPTION_UNKNOWN = 0,                 
@@ -396,6 +396,18 @@ enum {
 typedef unsigned long rtw_adaptivity_mode_t;
 
 /**
+  * @brief  The enumeration lists the trp_tis types.
+  */
+enum {
+	RTW_TRP_TIS_DISABLE = 0,
+	RTW_TRP_TIS_NORMAL,
+	RTW_TRP_TIS_DYNAMIC,				// enable dynamic mechanism
+	RTW_TRP_TIS_FIX_ACK_RATE,			// fix ack rate to 6M
+};
+typedef unsigned long rtw_trp_tis_mode_t;
+
+
+/**
   * @brief  The enumeration lists the supported operation mode by WIFI driver,
   *			including station and AP mode.
   */
@@ -575,6 +587,8 @@ enum _WIFI_EVENT_INDICATE{
 	WIFI_EVENT_IP_CHANGED = 16,
 	WIFI_EVENT_ICV_ERROR = 17,
 	WIFI_EVENT_CHALLENGE_FAIL = 18,
+	WIFI_EVENT_SOFTAP_START = 19,
+	WIFI_EVENT_SOFTAP_STOP = 20,
 	WIFI_EVENT_MAX,
 };
 typedef unsigned long rtw_event_indicate_t;
