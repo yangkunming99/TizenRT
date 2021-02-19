@@ -50,6 +50,7 @@
 ############################################################################
 
 CSRCS += wlan_network.c
+CSRCS += ping_test.c
 
 DEPPATH += --dep-path component/common/api/network/src
 VPATH += :component/common/api/network/src

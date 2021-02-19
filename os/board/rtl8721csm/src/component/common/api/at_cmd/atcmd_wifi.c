@@ -102,7 +102,7 @@ extern void show_bridgeif_fdbd(struct netif *netif);
 #if CONFIG_LWIP_LAYER
 extern void cmd_tcp(int argc, char **argv);
 extern void cmd_udp(int argc, char **argv);
-extern void cmd_ping(int argc, char **argv);
+extern void cmd_ping_ameba(int argc, char **argv);
 extern void cmd_ssl_client(int argc, char **argv);
 #endif 
 
@@ -3021,7 +3021,7 @@ void fATWI(void *arg){
     argv[0] = "ping";
 
     if((argc = parse_param(arg, argv)) > 1){
-        cmd_ping(argc, argv);
+        cmd_ping_ameba(argc, argv);
     }
 }
 
