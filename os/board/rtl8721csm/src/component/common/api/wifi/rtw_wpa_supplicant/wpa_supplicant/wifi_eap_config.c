@@ -1,5 +1,8 @@
 #if !defined(CONFIG_MBED_ENABLED)
 #include "main.h"
+#ifndef CONFIG_NET_NETMGR
+#include <lwip_netconf.h>
+#endif
 #include <lwip/netif.h>
 #endif
 #include <stdio.h>
@@ -226,6 +229,12 @@ int eap_start(char *method)
 	
 
 	ret = connect_by_open_system(eap_target_ssid);
+
+#if CONFIG_LWIP_LAYER
+		/* Start DHCPClient */
+	if(ret == 0)
+		LwIP_DHCP(0, DHCP_START);
+#endif
 
 	wifi_unreg_event_handler(WIFI_EVENT_EAPOL_START, eap_eapol_start_hdl);
 

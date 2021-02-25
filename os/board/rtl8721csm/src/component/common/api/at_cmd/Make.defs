@@ -49,8 +49,9 @@
 #
 ############################################################################
 
-CSRCS += wlan_network.c
-CSRCS += ping_test.c
+CSRCS += log_service.c \
+	 atcmd_sys.c \
+	 atcmd_wifi.c
 
-DEPPATH += --dep-path component/common/api/network/src
-VPATH += :component/common/api/network/src
+DEPPATH += --dep-path component/common/api/at_cmd
+VPATH += :component/common/api/at_cmd
