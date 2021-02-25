@@ -409,6 +409,7 @@ void km4_tickless_ipc_int(VOID *Data, u32 IrqStatus, u32 ChanNum)
 	u32 Rtemp;
 	KM4SLEEP_ParamDef * psleep_param;
 	
+	NVIC_ClearPendingIRQ(UART_LOG_IRQ_LP);
 	InterruptEn(UART_LOG_IRQ_LP, 10);
 	IPCM0_DEV->IPCx_USR[IPC_INT_CHAN_SHELL_SWITCH] = 0x00000000;
 
@@ -422,7 +423,9 @@ void km4_tickless_ipc_int(VOID *Data, u32 IrqStatus, u32 ChanNum)
 			SOCPS_AONTimer(psleep_param->sleep_time);
 			SOCPS_AONTimerCmd(ENABLE);
 		}
+		FLASH_Write_Lock();
 		SOCPS_DeepSleep_RAM();
+		FLASH_Write_Unlock();
 	}
 
 	km4_sleep_type = psleep_param->sleep_type;

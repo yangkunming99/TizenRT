@@ -121,7 +121,7 @@ void FLASH_Write_Unlock(void)
 		u32 hp_sleep_state;
 		if(km4_status_on()) {
 			while(1) {
-				hp_sleep_state = HAL_READ32(SYSTEM_CTRL_BASE_LP, REG_HS_PLATFORM_PARA);	/*get KM4 sleep status*/
+				hp_sleep_state = HAL_READ32(SYSTEM_CTRL_BASE_HP, REG_HS_PLATFORM_PARA);	/*get KM4 sleep status*/
 				if(!(hp_sleep_state & BIT_KM4_SLEEP_STATUS)) {
 					break;
 				}
@@ -541,4 +541,20 @@ void FLASH_ClockSwitch(u32 Source, u32 Protection)
 	}
 #endif
 }
+
+IMAGE2_RAM_TEXT_SECTION
+void FLASH_Invalidate_Auto_Write(void)
+{
+	/* Auto write related bits in valid command register are all set to 0,
+		just need to invalidate write single and write enable cmd in auto mode. */
+	SPIC_TypeDef *spi_flash = SPIC;
+
+	/* Disable SPI_FLASH User Mode */
+	spi_flash->ssienr = 0;
+	
+	/* Invalidate write single and write enable cmd in auto mode */
+	spi_flash->wr_single = 0x0;
+	spi_flash->wr_enable = 0x0;
+}
+
 /******************* (C) COPYRIGHT 2016 Realtek Semiconductor *****END OF FILE****/

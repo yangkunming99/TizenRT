@@ -79,7 +79,7 @@
 #endif
 #define CONFIG_LITTLE_ENDIAN
 #define CONFIG_80211N_HT
-//#define CONFIG_RECV_REORDERING_CTRL
+#define CONFIG_RECV_REORDERING_CTRL
 #define RTW_NOTCH_FILTER 0
 #define CONFIG_EMBEDDED_FWIMG
 #define CONFIG_PHY_SETTING_WITH_ODM
@@ -145,7 +145,7 @@
 	#ifdef CONFIG_HIGH_TP_TEST
     		#define RX_AGGREGATION 1
 	#else
-		#define RX_AGGREGATION 0
+		#define RX_AGGREGATION 1
 	#endif
 	#define RX_AMSDU 0
 #endif
@@ -201,7 +201,7 @@
 #define NOT_SUPPORT_RF_MULTIPATH
 #endif
 #define NOT_SUPPORT_VHT
-#define NOT_SUPPORT_40M
+//#define NOT_SUPPORT_40M
 #define NOT_SUPPORT_80M
 #if defined(CONFIG_PLATFORM_8195A)
 #define NOT_SUPPORT_BBSWING
@@ -255,11 +255,7 @@
 #endif
 
 // for probe request with custom vendor specific IE
-#ifdef CONFIG_PLATFORM_TIZENRT_OS
-#undef CONFIG_CUSTOM_IE
-#else
 #define CONFIG_CUSTOM_IE
-#endif
 
 #if (CONFIG_PLATFORM_AMEBA_X == 0)
 /* For multicast */
@@ -326,11 +322,7 @@
 /****************** End of EAP configurations *******************/
 
 /* For WPS and P2P */
-#ifdef CONFIG_PLATFORM_TIZENRT_OS
-#undef CONFIG_WPS
-#else
 #define CONFIG_WPS
-#endif
 #if 0
 #define CONFIG_WPS_AP
 #define CONFIG_P2P_NEW
@@ -512,21 +504,11 @@ extern unsigned int g_ap_sta_num;
 		#ifndef CONFIG_RTL8721D 
 			#define CONFIG_RTL8721D
 		#endif
-		#ifdef CONFIG_PLATFORM_TIZENRT_OS
-		#undef RX_AGGREGATION
-		#define RX_AGGREGATION 1
-		#undef NOT_SUPPORT_40M
-		#define RX_SHORTCUT 1
-		#endif
 		#undef NOT_SUPPORT_5G
 		#undef CONFIG_ADAPTOR_INFO_CACHING_FLASH
 		#define CONFIG_ADAPTOR_INFO_CACHING_FLASH 0
 		#define CONFIG_EFUSE_SEPARATE
-		#ifdef CONFIG_PLATFORM_TIZENRT_OS
-		#undef CONFIG_WOWLAN
-		#else
 		#define CONFIG_WOWLAN
-		#endif
 		//#define CONFIG_TRAFFIC_PROTECT
 		#undef SUPPORT_5G_CHANNEL
 		#define SUPPORT_5G_CHANNEL	1
@@ -554,6 +536,18 @@ extern unsigned int g_ap_sta_num;
 		#endif
 	#define CONFIG_WLAN_SWITCH_MODE         //save memory while switching mode without driver re-init
 	//#define LOW_POWER_WIFI_CONNECT
+	//#define LONG_PERIOD_TICKLESS
+		#ifdef CONFIG_PLATFORM_TIZENRT_OS
+		#undef CONFIG_RECV_REORDERING_CTRL
+		#undef RX_AGGREGATION
+		#define RX_AGGREGATION 1
+		#undef NOT_SUPPORT_40M
+		#define RX_SHORTCUT 1
+		#undef CONFIG_WOWLAN
+		#undef CONFIG_WPS
+		#undef CONFIG_CUSTOM_IE
+		#undef CONFIG_BT_COEXIST_SOC
+		#endif
 	#endif
 	#if defined(CONFIG_PLATFORM_8195BHP)
 		#define CONFIG_RTL8195B
@@ -890,5 +884,11 @@ extern unsigned int g_ap_sta_num;
 #define WLAN_WRAPPER_VERSION 1
 
 #define TIME_THRES	20
+
+/* 80211 - K V R */
+//#define CONFIG_LAYER2_ROAMING
+#ifdef CONFIG_LAYER2_ROAMING
+    #define CONFIG_RTW_WNM
+#endif
 
 #endif //WLANCONFIG_H
