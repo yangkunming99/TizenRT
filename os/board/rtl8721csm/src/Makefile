@@ -122,7 +122,13 @@ endif
 ifeq ($(CONFIG_USBD_MSC),y)
 include component/soc/realtek/amebad/fwlib/usb_otg/device/class/msc/src/Make.defs
 endif
-
+include component/common/api/at_cmd/Make.defs
+include project/realtek_amebaD_va0_example/src/Make.defs
+include component/common/utilities/Make.defs
+include component/common/example/cm_backtrace/Make.defs
+ifneq ($(CONFIG_NET_NETMGR),y)
+include component/common/network/dhcp/Make.defs
+endif
 ARCH_SRCDIR = 	$(TOPDIR)/arch/$(CONFIG_ARCH)/src
 BOARD_SRCDIR = 	$(TOPDIR)/board
 DIR = 		$(BOARD_SRCDIR)/$(CONFIG_ARCH_BOARD)/src/component/soc/realtek/amebad/app/monitor
@@ -166,6 +172,7 @@ CFLAGS += -I$(COMPONENT_DIR)/common/drivers/wlan/realtek/wlan_ram_map/rom
 CFLAGS += -I$(COMPONENT_DIR)/os/os_dep/include
 CFLAGS += -I$(COMPONENT_DIR)/os/tizenrt
 CFLAGS += -I$(TOPDIR)/net/lwip
+CFLAGS += -I$(TOPDIR)/net/lwip/src/include
 CFLAGS += -I$(DIR_WIFI)/rtw_wpa_supplicant/src
 CFLAGS += -I$(DIR_WIFI)/rtw_wpa_supplicant/wpa_supplicant
 CFLAGS += -I$(COMPONENT_DIR)/soc/realtek/amebad/misc

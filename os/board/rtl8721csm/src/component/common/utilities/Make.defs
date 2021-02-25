@@ -49,8 +49,7 @@
 #
 ############################################################################
 
-CSRCS += wlan_network.c
-CSRCS += ping_test.c
+CSRCS += tcptest.c
 
-DEPPATH += --dep-path component/common/api/network/src
-VPATH += :component/common/api/network/src
+DEPPATH += --dep-path component/common/utilities
+VPATH += :component/common/utilities

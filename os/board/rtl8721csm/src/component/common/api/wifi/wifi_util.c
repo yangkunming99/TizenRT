@@ -1824,4 +1824,3 @@ void wext_set_powersave_mode(__u8 ps_mode){
 	return;
 }
 #endif
-

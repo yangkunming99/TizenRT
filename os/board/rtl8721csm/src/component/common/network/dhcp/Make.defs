@@ -16,31 +16,7 @@
 #
 ############################################################################
 
-CSRCS += serial_api.c \
-	 pinmap_common.c \
-	 sys_api.c \
-	 us_ticker.c \
-	 timer_api.c \
-	 dma_api.c \
-	 gpio_api.c \
-	 gpio_irq_api.c \
-	 pinmap.c \
-	 port_api.c \
-	 spi_api.c \
-	 i2c_api.c \
-	 i2s_api.c \
-	 pwmout_api.c \
-	 analogin_api.c \
-	 efuse_api.c \
-	 sleep.c \
-	 wdt_api.c \
-	 us_ticker_api.c \
-	 wait_api.c \
-	 captouch_api.c \
-	 keyscan_api.c \
-	 lcdc_api.c \
-	 flash_api.c \
-	 rtc_api.c
+CSRCS += dhcps.c
 
-DEPPATH += --dep-path component/common/mbed/targets/hal/rtl8721d
-VPATH += :component/common/mbed/targets/hal/rtl8721d
+DEPPATH += --dep-path component/common/network/dhcp
+VPATH += :component/common/network/dhcp
