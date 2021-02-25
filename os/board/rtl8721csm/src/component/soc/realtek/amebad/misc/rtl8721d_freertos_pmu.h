@@ -67,6 +67,7 @@ void pmu_exec_wakeup_hook_funs(u32 nDeviceIdMax);
 uint32_t pmu_set_sleep_type(uint32_t type);
 uint32_t pmu_get_sleep_type(void);
 void pmu_set_max_sleep_time(uint32_t timer_ms);
+uint32_t pmu_get_max_sleep_time(void);
 #ifndef CONFIG_BUILD_ROM
 void pmu_deepsleep_cmd(u32 NewStatus);
 #endif

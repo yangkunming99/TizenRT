@@ -167,6 +167,7 @@ VOID SOCPS_SleepPG(VOID)
 		DBG_8195A("DBG: Sleep blocked because Dev %x  busy\n", nDeviceIdOffset);
 		return;
 	}
+	pmu_set_max_sleep_time(0);
 
 	/*Backup KM4 IPC configuration*/
 	PMC_BK.IPCbackup_HP = IPC_IERGet(IPCM4_DEV);
@@ -458,6 +459,7 @@ void SOCPS_SleepCG(void)
 		DBG_8195A("Oops: Sleep Fail %x !!!!!\n", nDeviceIdOffset);
 		return;
 	}
+	pmu_set_max_sleep_time(0);
 
 	ipc_send_message(IPC_INT_KM4_TICKLESS_INDICATION, (u32)&sleep_param);
 

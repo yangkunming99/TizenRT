@@ -209,10 +209,12 @@ void shell_switch_ipc_int(VOID *Data, u32 IrqStatus, u32 ChanNum)
 
 	if (CpuId == 1) {
 		DBG_8195A("KM4 shell\n");
+		NVIC_ClearPendingIRQ(UART_LOG_IRQ);
 		InterruptEn(UART_LOG_IRQ, 10);
 		pmu_set_sysactive_time(1000);
 	} else {
 		DBG_8195A("KM0 shell\n");
+		NVIC_ClearPendingIRQ(UART_LOG_IRQ_LP);
 		InterruptEn(UART_LOG_IRQ_LP, 10);
 	}
 }

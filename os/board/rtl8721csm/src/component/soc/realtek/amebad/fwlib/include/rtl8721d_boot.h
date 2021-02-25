@@ -128,6 +128,7 @@ extern void BOOT_FLASH_WakeFromPG(void);
 extern void BOOT_RAM_FuncEnable(void);
 extern u32 BOOT_RAM_FLASH_Calibration(u8 read_mode);
 extern PRAM_START_FUNCTION BOOT_RAM_SectionInit(void);
+extern void BOOT_FLASH_Invalidate_Auto_Write(void);
 
 extern u32 ROM_SIM_ENABLE;
 extern u32 IS_FPGA_VERIF; /* set in boot flash, based on MACRO, can not be used in ROM code */

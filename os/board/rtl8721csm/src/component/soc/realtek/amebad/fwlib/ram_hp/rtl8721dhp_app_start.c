@@ -1292,7 +1292,7 @@ static void app_psram_load_ns(void)
 
 	/* load psram code+data into PSRAM */
 	if((PsramHdr->image_size != 0) && \
-		(PsramHdr->image_addr == 0x02000000) && \
+		(PsramHdr->image_addr == 0x02000020) && \
 		(PsramHdr->signature[0] == 0x35393138) && \
 		(PsramHdr->signature[1] == 0x31313738)) {
 
