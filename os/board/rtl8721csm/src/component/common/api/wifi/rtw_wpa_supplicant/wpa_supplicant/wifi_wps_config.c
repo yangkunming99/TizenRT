@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#ifndef CONFIG_PLATFORM_TIZENRT_OS
 #include "FreeRTOS.h"
 #include "task.h"
 #include "main.h"
 #include "queue.h"
+#endif
 #include "utils/os.h"
 #ifndef CONFIG_NET_NETMGR
 #include <lwip_netconf.h>

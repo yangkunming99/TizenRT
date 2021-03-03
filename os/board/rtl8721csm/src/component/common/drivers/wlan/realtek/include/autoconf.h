@@ -326,7 +326,7 @@
 /****************** End of EAP configurations *******************/
 
 /* For WPS and P2P */
-#ifdef CONFIG_PLATFORM_TIZENRT_OS
+#if 0//def CONFIG_PLATFORM_TIZENRT_OS
 #undef CONFIG_WPS
 #else
 #define CONFIG_WPS
@@ -516,7 +516,11 @@ extern unsigned int g_ap_sta_num;
 		#undef RX_AGGREGATION
 		#define RX_AGGREGATION 1
 		#undef NOT_SUPPORT_40M
+		#if WIFI_LOGO_CERTIFICATION
+		#define RX_SHORTCUT 0
+		#else
 		#define RX_SHORTCUT 1
+		#endif
 		#endif
 		#undef NOT_SUPPORT_5G
 		#undef CONFIG_ADAPTOR_INFO_CACHING_FLASH
@@ -891,5 +895,11 @@ extern unsigned int g_ap_sta_num;
 #define WLAN_WRAPPER_VERSION 1
 
 #define TIME_THRES	20
+
+/* 80211 - K V R */
+//#define CONFIG_LAYER2_ROAMING
+#ifdef CONFIG_LAYER2_ROAMING
+    #define CONFIG_RTW_WNM
+#endif
 
 #endif //WLANCONFIG_H

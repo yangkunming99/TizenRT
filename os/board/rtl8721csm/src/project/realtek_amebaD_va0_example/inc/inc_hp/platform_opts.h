@@ -94,9 +94,9 @@
 //#define CONFIG_BAIDU_DUER	1
 #define CONFIG_DMIC_SEL	0
 /* For WPS and P2P */
-#define CONFIG_ENABLE_WPS		0
+#define CONFIG_ENABLE_WPS		1
 #define CONFIG_ENABLE_P2P		0//on/off p2p cmd in log_service or interactive mode
-#define CONFIG_ENABLE_WPS_DISCOVERY	0
+#define CONFIG_ENABLE_WPS_DISCOVERY	1
 #if CONFIG_ENABLE_P2P
 #define CONFIG_ENABLE_WPS_AP		1
 #undef CONFIG_WIFI_IND_USE_THREAD
