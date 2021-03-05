@@ -19,6 +19,9 @@
 #include "rtl8721d_cache.h"
 #include <tinyara/sched.h>
 #include "../../../kernel/sched/sched.h"
+#include "../../../kernel/mqueue/mqueue.h"
+#include <fcntl.h>
+
 /********************* os depended utilities ********************/
 
 #ifndef USE_MUTEX_FOR_SPINLOCK
@@ -428,32 +431,140 @@ static void _tizenrt_spinunlock_irqsave(_lock *plock, _irqL *irqL)
 
 static int _tizenrt_init_xqueue(_xqueue *queue, const char *name, u32 message_size, u32 number_of_messages)
 {
-	DiagPrintf("%s %d\r\n", __func__, __LINE__);
-	return 0;
+	mqd_t pmqd;
+	struct mq_attr attr;
+
+	if (!queue) {
+		DiagPrintf("%s queue is NULL\r\n", __func__);
+		return _FAIL;
+	}
+
+	if (*queue) {
+		DiagPrintf("%s msg queue already init NULL\r\n", __func__);
+		return _FAIL;
+	}
+	if (message_size > MQ_MAX_BYTES) {
+		DiagPrintf("%s message_size(%d) > MQ_MAX_BYTES(%d)\r\n", __func__, message_size, MQ_MAX_BYTES);
+		return _FAIL;
+	}
+	attr.mq_maxmsg = number_of_messages;
+	attr.mq_msgsize = message_size;
+
+	pmqd = mq_open((const char *) name, O_RDWR | O_CREAT, 0666, &attr);
+	if (pmqd == (mqd_t) ERROR) {
+		DiagPrintf("%s mq open fail\r\n", __func__);
+		return _FAIL;
+	}
+
+	*queue = pmqd;
+
+	return _SUCCESS;
 }
 
 static int _tizenrt_push_to_xqueue(_xqueue *queue, void *message, u32 timeout_ms)
 {
-	DiagPrintf("%s %d\r\n", __func__, __LINE__);
-	return 0;
+	int prio = MQ_PRIO_MAX;
+
+	if (!queue || *queue == NULL) {
+		DiagPrintf("%s queue is NULL\r\n", __func__);
+		return _FAIL;
+	}
+
+	if (timeout_ms != RTW_MAX_DELAY) {
+		struct timespec ts;
+		clock_gettime(CLOCK_REALTIME, &ts);
+		ts.tv_sec += timeout_ms / 1000;
+		ts.tv_nsec += (timeout_ms % 1000) * 1000 * 1000;
+		if (mq_timedsend((mqd_t) *queue, message, ((mqd_t) *queue)->msgq->maxmsgsize, prio, &ts) != OK) {
+			DiagPrintf("%s mq time send fail\r\n", __func__);
+			return _FAIL;
+		}
+	} else {
+		if (mq_send((mqd_t) *queue, message, ((mqd_t) *queue)->msgq->maxmsgsize, prio) != OK) {
+			DiagPrintf("%s mq send fail\r\n", __func__);
+			return _FAIL;
+		}
+	}
+
+	return _SUCCESS;
 }
 
 static int _tizenrt_pop_from_xqueue(_xqueue *queue, void *message, u32 timeout_ms)
 {
-	DiagPrintf("%s %d\r\n", __func__, __LINE__);
-	return 0;
+	int prio;
+
+	if (!queue || *queue == NULL) {
+		DiagPrintf("%s queue is NULL\r\n", __func__);
+		return _FAIL;
+	}
+
+
+	if (timeout_ms != RTW_MAX_DELAY) {
+		struct timespec ts;
+		clock_gettime(CLOCK_REALTIME, &ts);
+		ts.tv_sec += timeout_ms / 1000;
+		ts.tv_nsec += (timeout_ms % 1000) * 1000 * 1000;
+		if (mq_timedreceive((mqd_t) *queue, message, ((mqd_t) *queue)->msgq->maxmsgsize, &prio, &ts) == ERROR) {
+			if(ETIMEDOUT != get_errno())
+			{
+				printf("[osif_msg_recv] mq time receive fail errno:%d\r\n", get_errno());
+			}
+			return _FAIL;
+		}
+	} else {
+		if (mq_receive((mqd_t) *queue, message, ((mqd_t) *queue)->msgq->maxmsgsize, &prio) == ERROR) {
+			printf("[osif_msg_recv] mq receive fail\r\n");
+			return _FAIL;
+		}
+	}
+
+	return _SUCCESS;
 }
 
 static int _tizenrt_peek_from_xqueue( _xqueue* queue, void* message, u32 timeout_ms )
 {
+	struct mqueue_inode_s *msgq;
+	struct mqueue_msg_s *rcvmsg;
+	mqd_t mqdes;
+	int prio;
+	if (!queue || *queue == NULL) {
+		DiagPrintf("%s queue is NULL\r\n", __func__);
+		return _FAIL;
+	}
+	mqdes = (mqd_t)* queue;
 	DiagPrintf("%s %d\r\n", __func__, __LINE__);
-	return 0;
+	/* Get a pointer to the message queue */
+	msgq = mqdes->msgq;
+	if (timeout_ms == 0)
+		timeout_ms = RTW_MAX_DELAY;
+	/* Get the message from the head of the queue */
+	while ((rcvmsg = (FAR struct mqueue_msg_s *)sq_remfirst(&msgq->msglist)) == NULL && timeout_ms) {
+		usleep((unsigned int)1 * 1000);
+		timeout_ms--;
+	}
+
+	if (rcvmsg) {
+		/* Copy the message into the caller's buffer */
+		memcpy(message, (const void *)rcvmsg->mail, rcvmsg->msglen);
+		return _SUCCESS;
+	}
+
+	return _FAIL;
 }
 
 static int _tizenrt_deinit_xqueue(_xqueue *queue)
 {
-	DiagPrintf("%s %d\r\n", __func__, __LINE__);
-	return 0;
+	if (!queue || *queue == NULL) {
+		DiagPrintf("%s queue is NULL\r\n", __func__);
+		return _FAIL;
+	}
+
+	if(mq_close((mqd_t) *queue) != OK) {
+		DiagPrintf("%s mq 0x%x close fail\r\n", __func__, *queue);
+		return _FAIL;
+	}
+
+	return _SUCCESS;
 }
 
 static u32 _tizenrt_get_current_time(void)
