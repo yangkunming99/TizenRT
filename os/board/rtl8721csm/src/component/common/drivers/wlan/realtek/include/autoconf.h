@@ -326,11 +326,7 @@
 /****************** End of EAP configurations *******************/
 
 /* For WPS and P2P */
-#if 0//def CONFIG_PLATFORM_TIZENRT_OS
-#undef CONFIG_WPS
-#else
 #define CONFIG_WPS
-#endif
 #if 0
 #define CONFIG_WPS_AP
 #define CONFIG_P2P_NEW
@@ -519,6 +515,7 @@ extern unsigned int g_ap_sta_num;
 		#if WIFI_LOGO_CERTIFICATION
 		#define RX_SHORTCUT 0
 		#else
+		#undef CONFIG_WPS
 		#define RX_SHORTCUT 1
 		#endif
 		#endif
