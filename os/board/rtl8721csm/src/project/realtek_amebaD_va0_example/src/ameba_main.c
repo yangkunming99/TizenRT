@@ -80,7 +80,7 @@ static int ameba_atcmd(int argc, char **args)
 }
 
 const static tash_cmdlist_t ameba_at_cmds[] = {
-	{"ameba",  ameba_atcmd,   TASH_EXECMD_SYNC},
+	{"ameba",  ameba_atcmd,   TASH_EXECMD_ASYNC},
 	{NULL,    NULL,        0}
 };
 
