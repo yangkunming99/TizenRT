@@ -120,7 +120,7 @@ int tcp_client_func(struct iperf_data_t iperf_data)
 
 	tcp_client_buffer = rtw_malloc(iperf_data.buf_size);
 	if(!tcp_client_buffer){
-		printf("\n\r[ERROR] %s: Alloc buffer failed",__func__);
+		printf("\n\r[ERROR] %s: Alloc buffer failed %d",__func__, iperf_data.buf_size);
 		goto Exit2;
 	}
 
@@ -875,6 +875,7 @@ void cmd_tcp(int argc, char **argv)
 						goto Exit;
 					memset(&tcp_client_data,0,sizeof(struct iperf_data_t));
 					memset(&tcp_server_data,0,sizeof(struct iperf_data_t));
+					memset(&g_tcp_client_task,0,sizeof(g_tcp_client_task));
 					tcp_client_data.start = 1;
 					strncpy((char*)tcp_client_data.server_ip, argv[2], (strlen(argv[2])>16)?16:strlen(argv[2]));
 					argv_count+=2;
@@ -970,10 +971,7 @@ void cmd_tcp(int argc, char **argv)
 	}
 
 	if(tcp_client_data.start && (NULL == g_tcp_client_task.task)){
-		//if(xTaskCreate(tcp_client_handler, "tcp_client_handler", BSD_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1 + PRIORITIE_OFFSET, &g_tcp_client_task) != pdPASS)
-		if (rtw_create_task(&g_tcp_client_task, "tcp_client_handler", BSD_STACK_SIZE, IPERF_PRIORITY, tcp_client_handler, NULL) != _SUCCESS)
-			printf("\n\rTCP ERROR: Create TCP client task failed.");
-		else{
+		{
 			if(tcp_client_data.port == 0)
 				tcp_client_data.port = DEFAULT_PORT;
 			if(tcp_client_data.buf_size == 0)
@@ -983,6 +981,9 @@ void cmd_tcp(int argc, char **argv)
 			if((time_boundary == 0) && (size_boundary == 0))
 				tcp_client_data.time = DEFAULT_TIME;
 		}
+		//if(xTaskCreate(tcp_client_handler, "tcp_client_handler", BSD_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1 + PRIORITIE_OFFSET, &g_tcp_client_task) != pdPASS)
+		if (rtw_create_task(&g_tcp_client_task, "tcp_client_handler", BSD_STACK_SIZE, IPERF_PRIORITY, tcp_client_handler, NULL) != _SUCCESS)
+			printf("\n\rTCP ERROR: Create TCP client task failed.");
 	}
 
 	return;
