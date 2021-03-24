@@ -165,7 +165,7 @@ unsigned char sta_ip[4] = {192,168,1,80}, sta_netmask[4] = {255,255,255,0}, sta_
 
 #if WIFI_LOGO_CERTIFICATION_CONFIG
 unsigned char arp_keep_alive = 0;
-
+struct task_struct send_arp_task;
 void send_arp_thread(void *param)
 {
 	struct netif * pnetif = &xnetif[0];
@@ -173,7 +173,7 @@ void send_arp_thread(void *param)
 
 	while(arp_keep_alive){
 		gw = LwIP_GetGW(&xnetif[0]);
-		etharp_request(pnetif, (const ip4_addr_t*) gw);
+		etharp_request(pnetif, ip_2_ip4((const ip_addr_t*) gw));
 		rtw_msleep_os(1000);
 	}
 	rtw_thread_exit();
@@ -1197,13 +1197,11 @@ void fATWC(void *arg){
 	printf("\n\r");
 
 #if WIFI_LOGO_CERTIFICATION_CONFIG
-	struct task_struct send_arp_task;
 	//For KRACK 5.2.1, 5.2.2, 5.2.3 test, the SVD tool monitors traffic sent by the STA to see if the pairwise key is being reinstalled
 	//To assure that the STA is sending enough frames, create a thread to send arp request to gateway after wifi connection.
+	arp_keep_alive=1;
 	if(rtw_create_task(&send_arp_task, ((const char*)"send_arp_thread"), 512, 1, send_arp_thread,  NULL) != 1)
 		printf("\n\r%s xTaskCreate(send_arp_thread) failed", __FUNCTION__);
-	else
-		arp_keep_alive=1;
 #endif
 
 EXIT:
