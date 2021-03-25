@@ -957,10 +957,7 @@ void cmd_tcp(int argc, char **argv)
 	}
 
 	if(tcp_server_data.start && (NULL == g_tcp_server_task.task)){
-		//if(xTaskCreate(tcp_server_handler, "tcp_server_handler", BSD_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1 + PRIORITIE_OFFSET, &g_tcp_server_task) != pdPASS)
-		if (rtw_create_task(&g_tcp_server_task, "tcp_server_handler", BSD_STACK_SIZE, IPERF_PRIORITY, tcp_server_handler, NULL) != _SUCCESS)
-			printf("\n\rTCP ERROR: Create TCP server task failed.");
-		else{
+		{
 			if(tcp_server_data.port == 0)
 				tcp_server_data.port = DEFAULT_PORT;
 			if(tcp_server_data.buf_size == 0)
@@ -968,6 +965,9 @@ void cmd_tcp(int argc, char **argv)
 			if(tcp_server_data.report_interval == 0)
 				tcp_server_data.report_interval = DEFAULT_REPORT_INTERVAL;
 		}
+		//if(xTaskCreate(tcp_server_handler, "tcp_server_handler", BSD_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1 + PRIORITIE_OFFSET, &g_tcp_server_task) != pdPASS)
+		if (rtw_create_task(&g_tcp_server_task, "tcp_server_handler", BSD_STACK_SIZE, IPERF_PRIORITY, tcp_server_handler, NULL) != _SUCCESS)
+			printf("\n\rTCP ERROR: Create TCP server task failed.");
 	}
 
 	if(tcp_client_data.start && (NULL == g_tcp_client_task.task)){
@@ -1186,10 +1186,7 @@ void cmd_udp(int argc, char **argv)
 	}
 
 	if(udp_server_data.start && (NULL == g_udp_server_task.task)){
-		//if(xTaskCreate(udp_server_handler, "udp_server_handler", BSD_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2 + PRIORITIE_OFFSET, &g_udp_server_task) != pdPASS)
-		if (rtw_create_task(&g_udp_server_task, "udp_server_handler", BSD_STACK_SIZE, IPERF_PRIORITY, udp_server_handler, NULL) != _SUCCESS)
-			printf("\r\nUDP ERROR: Create UDP server task failed.");
-		else{
+		{
 			if(udp_server_data.port == 0)
 				udp_server_data.port = DEFAULT_PORT;
 			if(udp_server_data.buf_size == 0)
@@ -1200,13 +1197,13 @@ void cmd_udp(int argc, char **argv)
 				udp_server_data.time = DEFAULT_TIME;
 			}
 		}
+		//if(xTaskCreate(udp_server_handler, "udp_server_handler", BSD_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2 + PRIORITIE_OFFSET, &g_udp_server_task) != pdPASS)
+		if (rtw_create_task(&g_udp_server_task, "udp_server_handler", BSD_STACK_SIZE, IPERF_PRIORITY, udp_server_handler, NULL) != _SUCCESS)
+			printf("\r\nUDP ERROR: Create UDP server task failed.");
 	}
 	
 	if(udp_client_data.start && (NULL == g_udp_client_task.task)){
-		//if(xTaskCreate(udp_client_handler, "udp_client_handler", BSD_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1 + PRIORITIE_OFFSET, &g_udp_client_task) != pdPASS)
-		if (rtw_create_task(&g_udp_client_task, "udp_client_handler", BSD_STACK_SIZE, IPERF_PRIORITY, udp_client_handler, NULL) != _SUCCESS)
-			printf("\r\nUDP ERROR: Create UDP client task failed.");
-		else{
+		{
 			if(udp_client_data.port == 0)
 				udp_client_data.port = DEFAULT_PORT;
 			if(udp_client_data.bandwidth == 0)
@@ -1221,6 +1218,9 @@ void cmd_udp(int argc, char **argv)
 				udp_client_data.time = DEFAULT_TIME;
 			}
 		}
+		//if(xTaskCreate(udp_client_handler, "udp_client_handler", BSD_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1 + PRIORITIE_OFFSET, &g_udp_client_task) != pdPASS)
+		if (rtw_create_task(&g_udp_client_task, "udp_client_handler", BSD_STACK_SIZE, IPERF_PRIORITY, udp_client_handler, NULL) != _SUCCESS)
+			printf("\r\nUDP ERROR: Create UDP client task failed.");
 	}
 
 	return;
